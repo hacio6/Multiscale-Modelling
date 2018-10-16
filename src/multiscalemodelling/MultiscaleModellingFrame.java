@@ -6,11 +6,25 @@
 package multiscalemodelling;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
+//import java.awt.Graphics2D;
 import java.awt.Image;
+//import java.awt.Robot;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+//import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
 
 /**
  *
@@ -23,14 +37,16 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     int randomX, randomY;
     boolean play;
     Cell[][] matrix, matrix2;
+    Cell temp;
     Image offScrImg;
     Graphics offScrGraph;
+    //BufferedImage image;
 
     /**
      * Creates new form MultiscaleMdoellingFrame
      */
     public MultiscaleModellingFrame() {
-        
+
         initComponents();
         play = false;
         offScrImg = createImage(jPanel1.getWidth(), jPanel1.getHeight());
@@ -50,7 +66,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     }
 
     void refresh() {
-        
+
         offScrGraph.setColor(jPanel1.getBackground());
         offScrGraph.fillRect(0, 0, jPanel1.getWidth(), jPanel1.getHeight());
         for (int i = 0; i < width; i++) {
@@ -63,7 +79,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                 }
             }
         }
-        offScrGraph.setColor(Color.LIGHT_GRAY);
+        /* offScrGraph.setColor(Color.LIGHT_GRAY);
         for (int i = 0; i < height; i++) {
             int y = i * jPanel1.getHeight() / height;
             offScrGraph.drawLine(0, y, jPanel1.getWidth(), y);
@@ -71,7 +87,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         for (int i = 0; i < width; i++) {
             int x = i * jPanel1.getWidth() / width;
             offScrGraph.drawLine(x, 0, x, jPanel1.getHeight());
-        }
+        }*/
         jPanel1.getGraphics().drawImage(offScrImg, 0, 0, jPanel1);
     }
 
@@ -85,15 +101,28 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
+        startButton = new javax.swing.JButton();
         createButton = new javax.swing.JButton();
         drawButton = new javax.swing.JButton();
         numbersOfGrainsTextField = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        amountOfInclusionsTextField = new javax.swing.JTextField();
+        sizeOfInclusionsTextField = new javax.swing.JTextField();
+        typeOfInclusionComboBox = new javax.swing.JComboBox<>();
+        addInclusionsButton = new javax.swing.JButton();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        fileMenu = new javax.swing.JMenu();
+        microstructureMenu = new javax.swing.JMenu();
+        importMenuItem = new javax.swing.JMenuItem();
+        exportMenuItem = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setBackground(new java.awt.Color(51, 51, 51));
         jPanel1.setPreferredSize(new java.awt.Dimension(700, 700));
         jPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -110,17 +139,17 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 700, Short.MAX_VALUE)
+            .addGap(0, 701, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 700, Short.MAX_VALUE)
+            .addGap(0, 688, Short.MAX_VALUE)
         );
 
-        jButton1.setText("Start");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        startButton.setText("Start");
+        startButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                startButtonActionPerformed(evt);
             }
         });
 
@@ -145,7 +174,56 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
             }
         });
 
-        jLabel1.setText("Numbers of grains:");
+        jLabel1.setText("Numbers of grains");
+
+        jLabel2.setText("Amount of inclusions");
+
+        jLabel3.setText("Size of inclusions");
+
+        jLabel4.setText("Type of inclusion");
+
+        amountOfInclusionsTextField.setText("6");
+
+        sizeOfInclusionsTextField.setText("8");
+
+        typeOfInclusionComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "circular", "square" }));
+        typeOfInclusionComboBox.setToolTipText("");
+
+        addInclusionsButton.setText("Add inclusions");
+        addInclusionsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addInclusionsButtonActionPerformed(evt);
+            }
+        });
+
+        fileMenu.setText("File");
+
+        microstructureMenu.setText("Microstructure");
+
+        importMenuItem.setText("Import");
+        importMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importMenuItemActionPerformed(evt);
+            }
+        });
+        microstructureMenu.add(importMenuItem);
+
+        exportMenuItem.setText("Export");
+        exportMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportMenuItemActionPerformed(evt);
+            }
+        });
+        microstructureMenu.add(exportMenuItem);
+
+        fileMenu.add(microstructureMenu);
+
+        jMenuBar1.add(fileMenu);
+
+        jMenu2.setText("Edit");
+        jMenuBar1.add(jMenu2);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -153,40 +231,75 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(11, 11, 11)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 701, Short.MAX_VALUE)
                 .addGap(51, 51, 51)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(createButton)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(numbersOfGrainsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(drawButton)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 143, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(createButton)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(drawButton)
+                            .addComponent(startButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(numbersOfGrainsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 71, Short.MAX_VALUE)
+                        .addComponent(amountOfInclusionsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel4))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(sizeOfInclusionsTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(typeOfInclusionComboBox, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(addInclusionsButton)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 688, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
                         .addComponent(createButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(numbersOfGrainsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(numbersOfGrainsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(drawButton)
-                        .addGap(115, 115, 115)
-                        .addComponent(jButton1)))
-                .addContainerGap(26, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2)
+                            .addComponent(amountOfInclusionsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel3)
+                            .addComponent(sizeOfInclusionsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4)
+                            .addComponent(typeOfInclusionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addComponent(addInclusionsButton)
+                        .addGap(97, 97, 97)
+                        .addComponent(startButton)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     public void vonNeumann() {
-
+        //temp.color = Color.WHITE;
+        //temp.id = Cell.idColor(matrix[0][0].color);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 if (matrix[i][j].id != -1) {
@@ -209,10 +322,26 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
             }
         }
         change(matrix, matrix2, width, height);
+        /*for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (i == 0) {
+                    matrix2[i][j] = temp;
+                }
+                if (j == 0) {
+                    matrix2[i][j] = temp;
+                }
+                if (j == height - 1) {
+                    matrix2[i][j] = temp;
+                }
+                if (i == width - 1) {
+                    matrix2[i][j] = temp;
+                }
+            }
+        }*/
     }
 
     public void change(Cell[][] a, Cell[][] b, int width, int height) {
-        
+
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 a[i][j].color = b[i][j].color;
@@ -227,8 +356,6 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         int j = height * evt.getY() / jPanel1.getHeight();
 
         if (matrix[i][j].id == -1) {
-            // matrix[i][j].id = 1;
-            // matrix[i][j].color = Cell.randomColor();
             matrix[i][j].color = Cell.randomColor();
             matrix[i][j].id = Cell.idColor(matrix[i][j].color);
 
@@ -247,9 +374,9 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jPanel1ComponentResized
 
     private void createButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createButtonActionPerformed
-        
-        width = 100;
-        height = 100;
+
+        width = 102;
+        height = 102;
         matrix = new Cell[width][height];
         matrix2 = new Cell[width][height];
         for (int i = 0; i < width; i++) {
@@ -280,19 +407,109 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         refresh();
     }//GEN-LAST:event_drawButtonActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-       
+    private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
+
         play = !play;
         if (play) {
-            jButton1.setText("Stop");
+            startButton.setText("Stop");
         } else {
-            jButton1.setText("Start");
+            startButton.setText("Start");
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_startButtonActionPerformed
 
     private void numbersOfGrainsTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_numbersOfGrainsTextFieldActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_numbersOfGrainsTextFieldActionPerformed
+
+    private void exportMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportMenuItemActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            // save to file
+            try {
+                PrintWriter printWriter = new PrintWriter(new FileWriter(file));
+                //printWriter.println(width + " " + height);
+                for (int i = 0; i < width; i++) {
+                    for (int j = 0; j < height; j++) {
+                        printWriter.println(i + " " + j + " " + matrix[i][j].id);
+                    }
+                }
+                printWriter.close();
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+        }
+
+        /* //refresh();
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            // SaveScreenShot(jPanel1,"dupa.png");
+            String file2 = file.toString();
+            // open to file
+            //refresh();
+             BufferedImage image = new BufferedImage(jPanel1.getWidth(), jPanel1.getHeight(), BufferedImage.TYPE_INT_RGB);
+            //refresh();
+             Graphics g = image.getGraphics();
+             //refresh();
+             jPanel1.paint(g);
+
+            try {
+                ImageIO.write(image, "png", new File(file2));
+            } catch (IOException ex) {
+                java.util.logging.Logger.getLogger(MultiscaleModellingFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            }
+
+        }*/
+    }//GEN-LAST:event_exportMenuItemActionPerformed
+
+    private void importMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importMenuItemActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            BufferedReader bufferReader = null;
+
+            try {
+                bufferReader = new BufferedReader(new FileReader(file));
+                String line = null;
+                String splited = null;
+                for (int i = 0; i < width; i++) {
+                    for (int j = 0; j < height; j++) {
+                        // f0.println(i + " " + j + " " + matrix[i][j].id);
+                        line = bufferReader.readLine();
+                        splited = line;
+                        String[] splitedArray = null;
+                        splitedArray = splited.split(" ");
+                        matrix[i][j].id = Integer.parseInt(splitedArray[2]);
+                        matrix[i][j].color = new Color(matrix[i][j].id);
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (bufferReader != null) {
+                        bufferReader.close();
+                        refresh();
+                    }
+                } catch (IOException e) {
+                }
+            }
+        }
+    }//GEN-LAST:event_importMenuItemActionPerformed
+
+    private void addInclusionsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addInclusionsButtonActionPerformed
+        // TODO add your handling code here:
+        if(play == false){
+            
+        } else {
+            
+        }
+    }//GEN-LAST:event_addInclusionsButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -331,11 +548,24 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addInclusionsButton;
+    private javax.swing.JTextField amountOfInclusionsTextField;
     private javax.swing.JButton createButton;
     private javax.swing.JButton drawButton;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JMenuItem exportMenuItem;
+    private javax.swing.JMenu fileMenu;
+    private javax.swing.JMenuItem importMenuItem;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JMenu microstructureMenu;
     private javax.swing.JTextField numbersOfGrainsTextField;
+    private javax.swing.JTextField sizeOfInclusionsTextField;
+    private javax.swing.JButton startButton;
+    private javax.swing.JComboBox<String> typeOfInclusionComboBox;
     // End of variables declaration//GEN-END:variables
 }

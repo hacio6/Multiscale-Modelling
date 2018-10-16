@@ -5,6 +5,8 @@
  */
 package multiscalemodelling;
 
+import java.awt.Color;
+
 /**
  *
  * @author hacio
@@ -19,6 +21,10 @@ public class Main {
         MultiscaleModellingFrame mainForm = new MultiscaleModellingFrame();
         mainForm.setLocationRelativeTo(null);
         mainForm.show();
+       // Cell kom = new Cell(); 
+       // kom.color = kom.idColor();   
+        
+       // System.out.println(kom.id);
     }
     
 }
