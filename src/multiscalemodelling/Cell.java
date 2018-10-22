@@ -24,29 +24,17 @@ public class Cell {
 
     public static Color randomColor() {
         Random rand = new Random();
-        float r = rand.nextFloat();// /2f+0.3F;
-        float g = rand.nextFloat();
-        float b = rand.nextFloat();
-        //float g = 0;
-        //float b = 0;
-        while (r < 50 && g < 50 && b < 50) {
-            r = rand.nextFloat();// /2f+0.3F;
-            g = rand.nextFloat();
-            b = rand.nextFloat();
-            
-        }
-        Color randomColor = new Color(r,g,b);
-        return randomColor;/*
-        float h = rand.nextFloat();// /2f+0.3F;
+        //float r = rand.nextFloat();// /2f+0.3F;
+        //float g = rand.nextFloat();
+        //float b = rand.nextFloat();
+        float h = rand.nextFloat();
         float s = rand.nextFloat();
         float b = rand.nextFloat();
-        while (s < 20 && b < 50) {
-           // h = rand.nextFloat();// /2f+0.3F;
-            s = rand.nextFloat();
-            b = rand.nextFloat();
-        }
-        Color randomColor = new Color(Color.HSBtoRGB(h,s,b));
-        return randomColor;*/
+        h = rand.nextFloat();
+        s = rand.nextFloat();
+        b = rand.nextFloat() * (1f - 0.3f) + 0.3f;
+        Color randomColor = new Color(Color.HSBtoRGB(h, s, b));
+        return randomColor;
     }
 
     public static int idColor(Color color) {
