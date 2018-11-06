@@ -16,6 +16,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -40,7 +44,9 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     boolean isFull;
     //int counter;
     //BufferedImage image;
-    
+    Map<Integer, Integer> neighbours = new HashMap<Integer, Integer>();
+    List<HashMap.Entry<Integer, Integer>> mostFrequent;
+
     /**
      * Creates new form MultiscaleMdoellingFrame
      */
@@ -61,12 +67,17 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         TimerTask task = new TimerTask() {
             public void run() {
                 if (play) {
-                    vonNeumann();
+                    if (typeOfNeighborhoodComboBox.getSelectedItem().toString().equals("von Neumann")) {
+                        vonNeumann();
+                    } else if (typeOfNeighborhoodComboBox.getSelectedItem().toString().equals("Moore")) {
+                        moore();
+                    } else if (typeOfNeighborhoodComboBox.getSelectedItem().toString().equals("Moore 2")) {
+                        moore2();
+                    }
                     refresh();
                     isFullMatrix();
                     checkProgress();
                 }
-
             }
         };
         time.scheduleAtFixedRate(task, 0, 100);
@@ -142,6 +153,8 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         heightTextField = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        typeOfNeighborhoodComboBox = new javax.swing.JComboBox<>();
         jMenuBar1 = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         microstructureMenu = new javax.swing.JMenu();
@@ -197,11 +210,6 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         });
 
         numbersOfGrainsTextField.setText("30");
-        numbersOfGrainsTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                numbersOfGrainsTextFieldActionPerformed(evt);
-            }
-        });
 
         jLabel1.setText("Numbers of grains");
 
@@ -237,6 +245,10 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         jLabel6.setText("Height");
 
         heightTextField.setText("200");
+
+        jLabel7.setText("Type of neighborhood");
+
+        typeOfNeighborhoodComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "von Neumann", "Moore", "Moore 2" }));
 
         fileMenu.setText("File");
 
@@ -302,13 +314,18 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                                         .addGap(18, 18, 18)
                                         .addComponent(heightTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(startButton, javax.swing.GroupLayout.PREFERRED_SIZE, 358, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel7)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(typeOfNeighborhoodComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(typeOfInclusionComboBox, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(numbersOfGrainsTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(startButton, javax.swing.GroupLayout.PREFERRED_SIZE, 358, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                    .addComponent(numbersOfGrainsTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -347,6 +364,10 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(addInclusionsButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel7)
+                            .addComponent(typeOfNeighborhoodComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
                         .addComponent(startButton)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -473,6 +494,484 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         change(matrix, matrix2, width, height);
     }
 
+    public void moore() {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (matrix[i][j].id != -1) {
+                    if (matrix[i][j].color == Color.BLACK) {
+                        matrix2[i][j] = matrix[i][j];
+                    } else if (i > 0 && i < width - 1 && j > 0 && j < height - 1) {
+                        matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id == -1) {
+                            matrix2[i][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j - 1].id == -1) {
+                            matrix2[i + 1][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j].id == -1) {
+                            matrix2[i + 1][j] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j + 1].id == -1) {
+                            matrix2[i + 1][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i][j + 1].id == -1) {
+                            matrix2[i][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j + 1].id == -1) {
+                            matrix2[i - 1][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j].id == -1) {
+                            matrix2[i - 1][j] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j - 1].id == -1) {
+                            matrix2[i - 1][j - 1] = matrix[i][j];
+                        }
+                    } else if (i == 0 && i < width - 1 && j > 0 && j < height - 1) {
+                        matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id == -1) {
+                            matrix2[i][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j - 1].id == -1) {
+                            matrix2[i + 1][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j].id == -1) {
+                            matrix2[i + 1][j] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j + 1].id == -1) {
+                            matrix2[i + 1][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i][j + 1].id == -1) {
+                            matrix2[i][j + 1] = matrix[i][j];
+                        }
+                    } else if (i > 0 && i < width - 1 && j == 0 && j < height - 1) {
+                        matrix2[i][j] = matrix[i][j];
+                        if (matrix[i + 1][j].id == -1) {
+                            matrix2[i + 1][j] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j + 1].id == -1) {
+                            matrix2[i + 1][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i][j + 1].id == -1) {
+                            matrix2[i][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j + 1].id == -1) {
+                            matrix2[i - 1][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j].id == -1) {
+                            matrix2[i - 1][j] = matrix[i][j];
+                        }
+                    } else if (i > 0 && i == width - 1 && j > 0 && j < height - 1) {
+                        matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id == -1) {
+                            matrix2[i][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j - 1].id == -1) {
+                            matrix2[i - 1][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i][j + 1].id == -1) {
+                            matrix2[i][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j + 1].id == -1) {
+                            matrix2[i - 1][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j].id == -1) {
+                            matrix2[i - 1][j] = matrix[i][j];
+                        }
+                    } else if (i > 0 && i < width - 1 && j > 0 && j == height - 1) {
+                        matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id == -1) {
+                            matrix2[i][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j - 1].id == -1) {
+                            matrix2[i + 1][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j].id == -1) {
+                            matrix2[i + 1][j] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j].id == -1) {
+                            matrix2[i - 1][j] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j - 1].id == -1) {
+                            matrix2[i - 1][j - 1] = matrix[i][j];
+                        }
+                    } else if (i == 0 && j == 0) {
+                        matrix2[i][j] = matrix[i][j];
+                        if (matrix[i + 1][j].id == -1) {
+                            matrix2[i + 1][j] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j + 1].id == -1) {
+                            matrix2[i + 1][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i][j + 1].id == -1) {
+                            matrix2[i][j + 1] = matrix[i][j];
+                        }
+                    } else if (i == width - 1 && j == 0) {
+                        matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j + 1].id == -1) {
+                            matrix2[i][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j + 1].id == -1) {
+                            matrix2[i - 1][j + 1] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j].id == -1) {
+                            matrix2[i - 1][j] = matrix[i][j];
+                        }
+                    } else if (i == 0 && j == height - 1) {
+                        matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id == -1) {
+                            matrix2[i][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j - 1].id == -1) {
+                            matrix2[i + 1][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i + 1][j].id == -1) {
+                            matrix2[i + 1][j] = matrix[i][j];
+                        }
+                    } else if (i == width - 1 && j == height - 1) {
+                        matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id == -1) {
+                            matrix2[i][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j - 1].id == -1) {
+                            matrix2[i - 1][j - 1] = matrix[i][j];
+                        }
+                        if (matrix[i - 1][j].id == -1) {
+                            matrix2[i - 1][j] = matrix[i][j];
+                        }
+                    }
+                }
+                if (matrix[i][j].id == -1) {
+                    if (i == 0 && j == 0) {
+                        matrix2[i][j] = matrix[i + 1][j + 1];
+                    }
+                    if (i == width - 1 && j == 0) {
+                        matrix2[i][j] = matrix[i - 1][j + 1];
+                    }
+                    if (i == 0 && j == height - 1) {
+                        matrix2[i][j] = matrix[i + 1][j - 1];
+                    }
+                    if (i == width - 1 && j == height - 1) {
+                        matrix2[i][j] = matrix[i - 1][j - 1];
+                    }
+                }
+            }
+        }
+        change(matrix, matrix2, width, height);
+    }
+
+    public void moore2() {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (matrix[i][j].color == Color.BLACK) {
+                        matrix2[i][j] = matrix[i][j];
+                    }
+                if (matrix[i][j].id == -1) {
+                    neighbours = new HashMap<>();
+                    if (matrix[i][j].color == Color.BLACK) {
+                        matrix2[i][j] = matrix[i][j];
+                    } else if (i > 0 && i < width - 1 && j > 0 && j < height - 1) {
+                        // matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != -1 && matrix[i][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j - 1].id) == null) {
+                                neighbours.put(matrix[i][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j - 1].id, neighbours.get(matrix[i][j - 1].id) + 1);
+                        }
+                        if (matrix[i + 1][j - 1].id != -1 && matrix[i + 1][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j - 1].id) == null) {
+                                neighbours.put(matrix[i + 1][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j - 1].id, neighbours.get(matrix[i + 1][j - 1].id) + 1);
+                        }
+                        if (matrix[i + 1][j].id != -1 && matrix[i + 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j].id) == null) {
+                                neighbours.put(matrix[i + 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j].id, neighbours.get(matrix[i + 1][j].id) + 1);
+                        }
+                        if (matrix[i + 1][j + 1].id != -1 && matrix[i + 1][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j + 1].id) == null) {
+                                neighbours.put(matrix[i + 1][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j + 1].id, neighbours.get(matrix[i + 1][j + 1].id) + 1);
+                        }
+                        if (matrix[i][j + 1].id != -1 && matrix[i][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j + 1].id) == null) {
+                                neighbours.put(matrix[i][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j + 1].id, neighbours.get(matrix[i][j + 1].id) + 1);
+                        }
+                        if (matrix[i - 1][j + 1].id != -1 && matrix[i - 1][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j + 1].id) == null) {
+                                neighbours.put(matrix[i - 1][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j + 1].id, neighbours.get(matrix[i - 1][j + 1].id) + 1);
+                        }
+                        if (matrix[i - 1][j].id != -1 && matrix[i - 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j].id) == null) {
+                                neighbours.put(matrix[i - 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j].id, neighbours.get(matrix[i - 1][j].id) + 1);
+                        }
+                        if (matrix[i - 1][j - 1].id != -1 && matrix[i - 1][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j - 1].id) == null) {
+                                neighbours.put(matrix[i - 1][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j - 1].id, neighbours.get(matrix[i - 1][j - 1].id) + 1);
+                        }
+                    } else if (i == 0 && i < width - 1 && j > 0 && j < height - 1) {
+                        // matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != -1 && matrix[i][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j - 1].id) == null) {
+                                neighbours.put(matrix[i][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j - 1].id, neighbours.get(matrix[i][j - 1].id) + 1);
+                        }
+                        if (matrix[i + 1][j - 1].id != -1 && matrix[i + 1][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j - 1].id) == null) {
+                                neighbours.put(matrix[i + 1][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j - 1].id, neighbours.get(matrix[i + 1][j - 1].id) + 1);
+                        }
+                        if (matrix[i + 1][j].id != -1 && matrix[i + 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j].id) == null) {
+                                neighbours.put(matrix[i + 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j].id, neighbours.get(matrix[i + 1][j].id) + 1);
+                        }
+                        if (matrix[i + 1][j + 1].id != -1 && matrix[i + 1][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j + 1].id) == null) {
+                                neighbours.put(matrix[i + 1][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j + 1].id, neighbours.get(matrix[i + 1][j + 1].id) + 1);
+                        }
+                        if (matrix[i][j + 1].id != -1 && matrix[i][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j + 1].id) == null) {
+                                neighbours.put(matrix[i][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j + 1].id, neighbours.get(matrix[i][j + 1].id) + 1);
+                        }
+                    } else if (i > 0 && i < width - 1 && j == 0 && j < height - 1) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i + 1][j].id != -1 && matrix[i + 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j].id) == null) {
+                                neighbours.put(matrix[i + 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j].id, neighbours.get(matrix[i + 1][j].id) + 1);
+                        }
+                        if (matrix[i + 1][j + 1].id != -1 && matrix[i + 1][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j + 1].id) == null) {
+                                neighbours.put(matrix[i + 1][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j + 1].id, neighbours.get(matrix[i + 1][j + 1].id) + 1);
+                        }
+                        if (matrix[i][j + 1].id != -1 && matrix[i][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j + 1].id) == null) {
+                                neighbours.put(matrix[i][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j + 1].id, neighbours.get(matrix[i][j + 1].id) + 1);
+                        }
+                        if (matrix[i - 1][j + 1].id != -1 && matrix[i - 1][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j + 1].id) == null) {
+                                neighbours.put(matrix[i - 1][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j + 1].id, neighbours.get(matrix[i - 1][j + 1].id) + 1);
+                        }
+                        if (matrix[i - 1][j].id != -1 && matrix[i - 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j].id) == null) {
+                                neighbours.put(matrix[i - 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j].id, neighbours.get(matrix[i - 1][j].id) + 1);
+                        }
+                    } else if (i > 0 && i == width - 1 && j > 0 && j < height - 1) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != -1 && matrix[i][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j - 1].id) == null) {
+                                neighbours.put(matrix[i][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j - 1].id, neighbours.get(matrix[i][j - 1].id) + 1);
+                        }
+                        if (matrix[i - 1][j - 1].id != -1 && matrix[i - 1][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j - 1].id) == null) {
+                                neighbours.put(matrix[i - 1][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j - 1].id, neighbours.get(matrix[i - 1][j - 1].id) + 1);
+                        }
+                        if (matrix[i][j + 1].id != -1 && matrix[i][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j + 1].id) == null) {
+                                neighbours.put(matrix[i][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j + 1].id, neighbours.get(matrix[i][j + 1].id) + 1);
+                        }
+                        if (matrix[i - 1][j + 1].id != -1 && matrix[i - 1][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j + 1].id) == null) {
+                                neighbours.put(matrix[i - 1][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j + 1].id, neighbours.get(matrix[i - 1][j + 1].id) + 1);
+                        }
+                        if (matrix[i - 1][j].id != -1 && matrix[i - 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j].id) == null) {
+                                neighbours.put(matrix[i - 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j].id, neighbours.get(matrix[i - 1][j].id) + 1);
+                        }
+                    } else if (i > 0 && i < width - 1 && j > 0 && j == height - 1) {
+                        // matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != -1 && matrix[i][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j - 1].id) == null) {
+                                neighbours.put(matrix[i][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j - 1].id, neighbours.get(matrix[i][j - 1].id) + 1);
+                        }
+                        if (matrix[i + 1][j - 1].id != -1 && matrix[i + 1][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j - 1].id) == null) {
+                                neighbours.put(matrix[i + 1][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j - 1].id, neighbours.get(matrix[i + 1][j - 1].id) + 1);
+                        }
+                        if (matrix[i + 1][j].id != -1 && matrix[i + 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j].id) == null) {
+                                neighbours.put(matrix[i + 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j].id, neighbours.get(matrix[i + 1][j].id) + 1);
+                        }
+                        if (matrix[i - 1][j].id != -1 && matrix[i - 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j].id) == null) {
+                                neighbours.put(matrix[i - 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j].id, neighbours.get(matrix[i - 1][j].id) + 1);
+                        }
+                        if (matrix[i - 1][j - 1].id != -1 && matrix[i - 1][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j - 1].id) == null) {
+                                neighbours.put(matrix[i - 1][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j - 1].id, neighbours.get(matrix[i - 1][j - 1].id) + 1);
+                        }
+                    } else if (i == 0 && j == 0) {
+                        // matrix2[i][j] = matrix[i][j];
+                        if (matrix[i + 1][j].id != -1 && matrix[i + 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j].id) == null) {
+                                neighbours.put(matrix[i + 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j].id, neighbours.get(matrix[i + 1][j].id) + 1);
+                        }
+                        if (matrix[i + 1][j + 1].id != -1 && matrix[i + 1][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j + 1].id) == null) {
+                                neighbours.put(matrix[i + 1][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j + 1].id, neighbours.get(matrix[i + 1][j + 1].id) + 1);
+                        }
+                        if (matrix[i][j + 1].id != -1 && matrix[i][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j + 1].id) == null) {
+                                neighbours.put(matrix[i][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j + 1].id, neighbours.get(matrix[i][j + 1].id) + 1);
+                        }
+                    } else if (i == width - 1 && j == 0) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j + 1].id != -1 && matrix[i][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j + 1].id) == null) {
+                                neighbours.put(matrix[i][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j + 1].id, neighbours.get(matrix[i][j + 1].id) + 1);
+                        }
+                        if (matrix[i - 1][j + 1].id != -1 && matrix[i - 1][j + 1].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j + 1].id) == null) {
+                                neighbours.put(matrix[i - 1][j + 1].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j + 1].id, neighbours.get(matrix[i - 1][j + 1].id) + 1);
+                        }
+                        if (matrix[i - 1][j].id != -1 && matrix[i - 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j].id) == null) {
+                                neighbours.put(matrix[i - 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j].id, neighbours.get(matrix[i - 1][j].id) + 1);
+                        }
+                    } else if (i == 0 && j == height - 1) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != -1 && matrix[i][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j - 1].id) == null) {
+                                neighbours.put(matrix[i][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j - 1].id, neighbours.get(matrix[i][j - 1].id) + 1);
+                        }
+                        if (matrix[i + 1][j - 1].id != -1 && matrix[i + 1][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j - 1].id) == null) {
+                                neighbours.put(matrix[i + 1][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j - 1].id, neighbours.get(matrix[i + 1][j - 1].id) + 1);
+                        }
+                        if (matrix[i + 1][j].id != -1 && matrix[i + 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i + 1][j].id) == null) {
+                                neighbours.put(matrix[i + 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i + 1][j].id, neighbours.get(matrix[i + 1][j].id) + 1);
+                        }
+                    } else if (i == width - 1 && j == height - 1) {
+                        // matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != -1 && matrix[i][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i][j - 1].id) == null) {
+                                neighbours.put(matrix[i][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i][j - 1].id, neighbours.get(matrix[i][j - 1].id) + 1);
+                        }
+                        if (matrix[i - 1][j - 1].id != -1 && matrix[i - 1][j - 1].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j - 1].id) == null) {
+                                neighbours.put(matrix[i - 1][j - 1].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j - 1].id, neighbours.get(matrix[i - 1][j - 1].id) + 1);
+                        }
+                        if (matrix[i - 1][j].id != -1 && matrix[i - 1][j].id != -16777216) {
+                            if (neighbours.get(matrix[i - 1][j].id) == null) {
+                                neighbours.put(matrix[i - 1][j].id, 0);
+                            }
+                            neighbours.put(matrix[i - 1][j].id, neighbours.get(matrix[i - 1][j].id) + 1);
+                        }
+                    }
+                    
+                    if (!neighbours.isEmpty()) {
+                        //if (neighbours.get(matrix[i][j].id) != null && neighbours.get(matrix[i][j].id) == -16777216) neighbours.remove(matrix[i][j].id);
+                        mostFrequent = new ArrayList<>();
+                        Map.Entry<Integer, Integer> maxEntry = null;
+
+                        for (Map.Entry<Integer, Integer> entry : neighbours.entrySet()) {
+                            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) >= 0) {
+                                maxEntry = entry;
+                                mostFrequent.add(maxEntry);
+
+                            }
+                        }
+                        if (!mostFrequent.isEmpty()) {
+                            Random random = new Random();
+
+                            int temp = Math.abs(random.nextInt()) % mostFrequent.size();
+                            matrix2[i][j].id = mostFrequent.get(temp).getKey();
+                            matrix2[i][j].color = new Color(matrix2[i][j].id);
+                        }
+                    }
+
+                }
+
+                /* if (matrix[i][j].id == -1) {
+                    if (i == 0 && j == 0) {
+                        matrix2[i][j] = matrix[i + 1][j + 1];
+                    }
+                    if (i == width - 1 && j == 0) {
+                        matrix2[i][j] = matrix[i - 1][j + 1];
+                    }
+                    if (i == 0 && j == height - 1) {
+                        matrix2[i][j] = matrix[i + 1][j - 1];
+                    }
+                    if (i == width - 1 && j == height - 1) {
+                        matrix2[i][j] = matrix[i - 1][j - 1];
+                    }
+                }*/
+            }
+        }
+        change(matrix, matrix2, width, height);
+
+    }
+
     public boolean isFullMatrix() {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -576,10 +1075,6 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
             startButton.setText("Resume");
         }
     }//GEN-LAST:event_startButtonActionPerformed
-
-    private void numbersOfGrainsTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_numbersOfGrainsTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_numbersOfGrainsTextFieldActionPerformed
 
     private void exportMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportMenuItemActionPerformed
         // TODO add your handling code here:
@@ -915,6 +1410,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
@@ -924,6 +1420,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     private javax.swing.JTextField sizeOfInclusionsTextField;
     private javax.swing.JButton startButton;
     private javax.swing.JComboBox<String> typeOfInclusionComboBox;
+    private javax.swing.JComboBox<String> typeOfNeighborhoodComboBox;
     private javax.swing.JTextField widthTextField;
     // End of variables declaration//GEN-END:variables
 }
