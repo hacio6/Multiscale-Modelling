@@ -46,6 +46,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     //BufferedImage image;
     Map<Integer, Integer> neighbours = new HashMap<Integer, Integer>();
     List<HashMap.Entry<Integer, Integer>> mostFrequent;
+    int GBsize = 0;
 
     /**
      * Creates new form MultiscaleMdoellingFrame
@@ -56,6 +57,10 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         startButton.setEnabled(false);
         jProgressBar1.setStringPainted(true);
         jProgressBar1.setString(0 + "% Complete");
+        addGrainsButton.setEnabled(false);
+        addInclusionsButton.setEnabled(false);
+        GBAllGrainsButton.setEnabled(false);
+        clearSpaceButton.setEnabled(false);
         play = false;
         isFull = false;
         //offScrImg = createImage(jPanel1.getWidth(), jPanel1.getHeight());
@@ -99,6 +104,19 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         } else {
             jProgressBar1.setString((int) ((counter * 100) / (width * height)) + "% Complete");
         }
+    }
+
+    void checkPercentageOfGB() {
+        int counter = 0;
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (matrix[i][j].color == Color.BLACK) {
+                    counter++;
+                }
+            }
+        }
+        //jProgressBar1.setValue((int) ((counter * 100) / (width * height)));
+        perOfGBLabel.setText((int) ((counter * 100) / (width * height)) + "% of GB");
     }
 
     void refresh() {
@@ -155,6 +173,11 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         heightTextField = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         typeOfNeighborhoodComboBox = new javax.swing.JComboBox<>();
+        GBAllGrainsButton = new javax.swing.JButton();
+        clearSpaceButton = new javax.swing.JButton();
+        perOfGBLabel = new javax.swing.JLabel();
+        GBsizeLabel = new javax.swing.JLabel();
+        GBSingleGrainsButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         microstructureMenu = new javax.swing.JMenu();
@@ -250,6 +273,29 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
 
         typeOfNeighborhoodComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "von Neumann", "Moore", "Moore 2" }));
 
+        GBAllGrainsButton.setText("GB all grains");
+        GBAllGrainsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GBAllGrainsButtonActionPerformed(evt);
+            }
+        });
+
+        clearSpaceButton.setText("Clear space");
+        clearSpaceButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearSpaceButtonActionPerformed(evt);
+            }
+        });
+
+        perOfGBLabel.setText("% of GB");
+
+        GBSingleGrainsButton.setText("GB single grains");
+        GBSingleGrainsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GBSingleGrainsButtonActionPerformed(evt);
+            }
+        });
+
         fileMenu.setText("File");
 
         microstructureMenu.setText("Microstructure");
@@ -290,29 +336,6 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(276, 276, 276)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jLabel5)
-                                        .addGap(22, 22, 22)
-                                        .addComponent(widthTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jLabel4)
-                                        .addComponent(addInclusionsButton)
-                                        .addComponent(jLabel3)
-                                        .addComponent(jLabel2)
-                                        .addComponent(addGrainsButton)
-                                        .addComponent(jLabel1)
-                                        .addComponent(createButton)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 121, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(sizeOfInclusionsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(amountOfInclusionsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jLabel6)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(heightTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -321,11 +344,47 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                                         .addComponent(jLabel7)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(typeOfNeighborhoodComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(276, 276, 276)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(typeOfInclusionComboBox, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(numbersOfGrainsTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(GBSingleGrainsButton)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(perOfGBLabel)
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addComponent(typeOfInclusionComboBox, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(numbersOfGrainsTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jLabel5)
+                                                .addGap(22, 22, 22)
+                                                .addComponent(widthTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addComponent(jLabel4)
+                                                .addComponent(addInclusionsButton)
+                                                .addComponent(jLabel3)
+                                                .addComponent(jLabel2)
+                                                .addComponent(addGrainsButton)
+                                                .addComponent(jLabel1)
+                                                .addComponent(createButton)
+                                                .addComponent(GBAllGrainsButton)
+                                                .addComponent(clearSpaceButton)))
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 180, Short.MAX_VALUE)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                                    .addComponent(sizeOfInclusionsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(amountOfInclusionsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addGroup(layout.createSequentialGroup()
+                                                        .addComponent(jLabel6)
+                                                        .addGap(18, 18, 18)
+                                                        .addComponent(heightTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(224, 224, 224)
+                                                .addComponent(GBsizeLabel)
+                                                .addGap(0, 0, Short.MAX_VALUE)))))))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -363,6 +422,16 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                             .addComponent(jLabel4))
                         .addGap(18, 18, 18)
                         .addComponent(addInclusionsButton)
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(GBAllGrainsButton)
+                            .addComponent(GBsizeLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(GBSingleGrainsButton)
+                            .addComponent(perOfGBLabel))
+                        .addGap(28, 28, 28)
+                        .addComponent(clearSpaceButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel7)
@@ -663,8 +732,8 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 if (matrix[i][j].color == Color.BLACK) {
-                        matrix2[i][j] = matrix[i][j];
-                    }
+                    matrix2[i][j] = matrix[i][j];
+                }
                 if (matrix[i][j].id == -1) {
                     neighbours = new HashMap<>();
                     if (matrix[i][j].color == Color.BLACK) {
@@ -928,7 +997,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                             neighbours.put(matrix[i - 1][j].id, neighbours.get(matrix[i - 1][j].id) + 1);
                         }
                     }
-                    
+
                     if (!neighbours.isEmpty()) {
                         //if (neighbours.get(matrix[i][j].id) != null && neighbours.get(matrix[i][j].id) == -16777216) neighbours.remove(matrix[i][j].id);
                         mostFrequent = new ArrayList<>();
@@ -985,6 +1054,8 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         startButton.setEnabled(false);
         addGrainsButton.setEnabled(false);
         addInclusionsButton.setEnabled(true);
+        GBAllGrainsButton.setEnabled(true);
+        GBSingleGrainsButton.setEnabled(true);
         return true;
     }
 
@@ -1039,7 +1110,10 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         startButton.setText("Start");
         startButton.setEnabled(true);
         addGrainsButton.setEnabled(true);
-        //jProgressBar1.setStringPainted(true);
+        addInclusionsButton.setEnabled(true);
+        GBAllGrainsButton.setEnabled(false);
+        GBSingleGrainsButton.setEnabled(false);
+        clearSpaceButton.setEnabled(false);
         jProgressBar1.setValue(0);
         jProgressBar1.setString(0 + "% Complete");
     }//GEN-LAST:event_createButtonActionPerformed
@@ -1359,6 +1433,372 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_typeOfInclusionComboBoxItemStateChanged
 
+    private void GBAllGrainsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GBAllGrainsButtonActionPerformed
+        // TODO add your handling code here:
+        clearSpaceButton.setEnabled(true);
+        GBsizeLabel.setText("GB size = " + ++GBsize);
+        if (startButton.getText().equals("Finished")) {
+            Cell black = new Cell();
+            black.color = Color.BLACK;
+            black.id = Cell.idColor(black.color);
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    if (i > 0 && i < width - 1 && j > 0 && j < height - 1) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrix2[i][j - 1] = black;
+                        }
+                        if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                            matrix2[i + 1][j - 1] = black;
+                        }
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrix2[i + 1][j] = black;
+                        }
+                        if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                            matrix2[i + 1][j + 1] = black;
+                        }
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrix2[i][j + 1] = black;
+                        }
+                        if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                            matrix2[i - 1][j + 1] = black;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrix2[i - 1][j] = black;
+                        }
+                        if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                            matrix2[i - 1][j - 1] = black;
+                        }
+                    } else if (i == 0 && i < width - 1 && j > 0 && j < height - 1) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrix2[i][j - 1] = black;
+                        }
+                        if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                            matrix2[i + 1][j - 1] = black;
+                        }
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrix2[i + 1][j] = black;
+                        }
+                        if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                            matrix2[i + 1][j + 1] = black;
+                        }
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrix2[i][j + 1] = black;
+                        }
+                    } else if (i > 0 && i < width - 1 && j == 0 && j < height - 1) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrix2[i + 1][j] = black;
+                        }
+                        if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                            matrix2[i + 1][j + 1] = black;
+                        }
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrix2[i][j + 1] = black;
+                        }
+                        if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                            matrix2[i - 1][j + 1] = black;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrix2[i - 1][j] = black;
+                        }
+                    } else if (i > 0 && i == width - 1 && j > 0 && j < height - 1) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrix2[i][j - 1] = black;
+                        }
+                        if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                            matrix2[i - 1][j - 1] = black;
+                        }
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrix2[i][j + 1] = black;
+                        }
+                        if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                            matrix2[i - 1][j + 1] = black;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrix2[i - 1][j] = black;
+                        }
+                    } else if (i > 0 && i < width - 1 && j > 0 && j == height - 1) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrix2[i][j - 1] = black;
+                        }
+                        if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                            matrix2[i + 1][j - 1] = black;
+                        }
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrix2[i + 1][j] = black;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrix2[i - 1][j] = black;
+                        }
+                        if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                            matrix2[i - 1][j - 1] = black;
+                        }
+                    } else if (i == 0 && j == 0) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrix2[i + 1][j] = black;
+                        }
+                        if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                            matrix2[i + 1][j + 1] = black;
+                        }
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrix2[i][j + 1] = black;
+                        }
+                    } else if (i == width - 1 && j == 0) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrix2[i][j + 1] = black;
+                        }
+                        if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                            matrix2[i - 1][j + 1] = black;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrix2[i - 1][j] = black;
+                        }
+                    } else if (i == 0 && j == height - 1) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrix2[i][j - 1] = black;
+                        }
+                        if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                            matrix2[i + 1][j - 1] = black;
+                        }
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrix2[i + 1][j] = black;
+                        }
+                    } else if (i == width - 1 && j == height - 1) {
+                        //matrix2[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrix2[i][j - 1] = black;
+                        }
+                        if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                            matrix2[i - 1][j - 1] = black;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrix2[i - 1][j] = black;
+                        }
+                    }
+
+                    /*if (matrix[i][j].id == -1) {
+                        if (i == 0 && j == 0) {
+                            matrix2[i][j] = matrix[i + 1][j + 1];
+                        }
+                        if (i == width - 1 && j == 0) {
+                            matrix2[i][j] = matrix[i - 1][j + 1];
+                        }
+                        if (i == 0 && j == height - 1) {
+                            matrix2[i][j] = matrix[i + 1][j - 1];
+                        }
+                        if (i == width - 1 && j == height - 1) {
+                            matrix2[i][j] = matrix[i - 1][j - 1];
+                        }
+                    }*/
+                }
+            }
+        }
+        change(matrix, matrix2, width, height);
+        refresh();
+        checkPercentageOfGB();
+    }//GEN-LAST:event_GBAllGrainsButtonActionPerformed
+
+    private void clearSpaceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearSpaceButtonActionPerformed
+        // TODO add your handling code here:
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (matrix[i][j].color != Color.BLACK) {
+                    matrix2[i][j] = new Cell();
+                }
+            }
+        }
+        change(matrix, matrix2, width, height);
+        refresh();
+        startButton.setText("Start");
+        startButton.setEnabled(true);
+        addGrainsButton.setEnabled(true);
+        addInclusionsButton.setEnabled(true);
+        GBAllGrainsButton.setEnabled(false);
+        GBSingleGrainsButton.setEnabled(false);
+        clearSpaceButton.setEnabled(false);
+        jProgressBar1.setValue(0);
+        jProgressBar1.setString(0 + "% Complete");
+    }//GEN-LAST:event_clearSpaceButtonActionPerformed
+
+    private void GBSingleGrainsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GBSingleGrainsButtonActionPerformed
+        // TODO add your handling code here:
+        clearSpaceButton.setEnabled(true);
+        Cell black = new Cell();
+        black.color = Color.BLACK;
+        black.id = Cell.idColor(black.color);
+        Cell white = new Cell();
+        Cell selected = new Cell();
+        int temp = 1;
+        Random random = new Random();
+        randomX = 0;
+        randomY = 0;
+        while (temp > 0) {
+            randomX = Math.abs(random.nextInt()) % width;
+            randomY = Math.abs(random.nextInt()) % height;
+
+            if (matrix[randomX][randomY] != black && matrix[randomX][randomY] != white) {
+                selected = matrix[randomX][randomY];
+                for (int i = 0; i < width; i++) {
+                    for (int j = 0; j < height; j++) {
+                        if (matrix[i][j].id == selected.id) {
+                            if (i > 0 && i < width - 1 && j > 0 && j < height - 1) {
+                                //matrix2[i][j] = matrix[i][j];
+                                if (matrix[i][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i][j - 1] = black;
+                                }
+                                if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j - 1] = black;
+                                }
+                                if (matrix[i + 1][j].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j] = black;
+                                }
+                                if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j + 1] = black;
+                                }
+                                if (matrix[i][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i][j + 1] = black;
+                                }
+                                if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j + 1] = black;
+                                }
+                                if (matrix[i - 1][j].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j] = black;
+                                }
+                                if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j - 1] = black;
+                                }
+                            } else if (i == 0 && i < width - 1 && j > 0 && j < height - 1) {
+                                //matrix2[i][j] = matrix[i][j];
+                                if (matrix[i][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i][j - 1] = black;
+                                }
+                                if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j - 1] = black;
+                                }
+                                if (matrix[i + 1][j].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j] = black;
+                                }
+                                if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j + 1] = black;
+                                }
+                                if (matrix[i][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i][j + 1] = black;
+                                }
+                            } else if (i > 0 && i < width - 1 && j == 0 && j < height - 1) {
+                                //matrix2[i][j] = matrix[i][j];
+                                if (matrix[i + 1][j].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j] = black;
+                                }
+                                if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j + 1] = black;
+                                }
+                                if (matrix[i][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i][j + 1] = black;
+                                }
+                                if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j + 1] = black;
+                                }
+                                if (matrix[i - 1][j].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j] = black;
+                                }
+                            } else if (i > 0 && i == width - 1 && j > 0 && j < height - 1) {
+                                //matrix2[i][j] = matrix[i][j];
+                                if (matrix[i][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i][j - 1] = black;
+                                }
+                                if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j - 1] = black;
+                                }
+                                if (matrix[i][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i][j + 1] = black;
+                                }
+                                if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j + 1] = black;
+                                }
+                                if (matrix[i - 1][j].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j] = black;
+                                }
+                            } else if (i > 0 && i < width - 1 && j > 0 && j == height - 1) {
+                                //matrix2[i][j] = matrix[i][j];
+                                if (matrix[i][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i][j - 1] = black;
+                                }
+                                if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j - 1] = black;
+                                }
+                                if (matrix[i + 1][j].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j] = black;
+                                }
+                                if (matrix[i - 1][j].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j] = black;
+                                }
+                                if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j - 1] = black;
+                                }
+                            } else if (i == 0 && j == 0) {
+                                //matrix2[i][j] = matrix[i][j];
+                                if (matrix[i + 1][j].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j] = black;
+                                }
+                                if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j + 1] = black;
+                                }
+                                if (matrix[i][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i][j + 1] = black;
+                                }
+                            } else if (i == width - 1 && j == 0) {
+                                //matrix2[i][j] = matrix[i][j];
+                                if (matrix[i][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i][j + 1] = black;
+                                }
+                                if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j + 1] = black;
+                                }
+                                if (matrix[i - 1][j].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j] = black;
+                                }
+                            } else if (i == 0 && j == height - 1) {
+                                //matrix2[i][j] = matrix[i][j];
+                                if (matrix[i][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i][j - 1] = black;
+                                }
+                                if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j - 1] = black;
+                                }
+                                if (matrix[i + 1][j].id != matrix[i][j].id) {
+                                    matrix2[i + 1][j] = black;
+                                }
+                            } else if (i == width - 1 && j == height - 1) {
+                                //matrix2[i][j] = matrix[i][j];
+                                if (matrix[i][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i][j - 1] = black;
+                                }
+                                if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j - 1] = black;
+                                }
+                                if (matrix[i - 1][j].id != matrix[i][j].id) {
+                                    matrix2[i - 1][j] = black;
+                                }
+                            }
+                        }
+                    }
+                }
+                change(matrix, matrix2, width, height);
+                refresh();
+                checkPercentageOfGB();
+            }
+            temp = 0;
+        }
+
+    }//GEN-LAST:event_GBSingleGrainsButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1396,9 +1836,13 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton GBAllGrainsButton;
+    private javax.swing.JButton GBSingleGrainsButton;
+    private javax.swing.JLabel GBsizeLabel;
     private javax.swing.JButton addGrainsButton;
     private javax.swing.JButton addInclusionsButton;
     private javax.swing.JTextField amountOfInclusionsTextField;
+    private javax.swing.JButton clearSpaceButton;
     private javax.swing.JButton createButton;
     private javax.swing.JMenuItem exportMenuItem;
     private javax.swing.JMenu fileMenu;
@@ -1417,6 +1861,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JMenu microstructureMenu;
     private javax.swing.JTextField numbersOfGrainsTextField;
+    private javax.swing.JLabel perOfGBLabel;
     private javax.swing.JTextField sizeOfInclusionsTextField;
     private javax.swing.JButton startButton;
     private javax.swing.JComboBox<String> typeOfInclusionComboBox;
