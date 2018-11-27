@@ -16,10 +16,12 @@ public class Cell {
 
     Color color;
     int id;
+    boolean visited;
 
     public Cell() {
         color = Color.WHITE;
         id = idColor(color);
+        visited = false;
     }
 
     public static Color randomColor() {
