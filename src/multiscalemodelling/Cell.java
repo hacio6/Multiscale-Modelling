@@ -42,4 +42,15 @@ public class Cell {
     public static int idColor(Color color) {
         return color.getRGB();
     }
+    
+    public static Color energyColor(int H){
+        float h;
+        float s;
+        float b;
+        h = 0.675f;
+        s = H*0.1f;
+        b = 0.5f;
+        Color energyColor = new Color(Color.HSBtoRGB(h, s, b));        
+        return energyColor;
+    }
 }
