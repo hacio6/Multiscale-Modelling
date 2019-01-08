@@ -38,7 +38,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     int grains, inclusions, sizeOfInclusions;
     int randomX, randomY;
     boolean play;
-    Cell[][] matrix, matrix2;
+    Cell[][] matrix, matrix2, matrixED;
     //Image offScrImg;
     BufferedImage offScrImg;
     //Graphics offScrGraph;
@@ -62,6 +62,8 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     int counter = 0;
     Color dualPhaseColor;
     List<Color> stateNumberList2 = new ArrayList<Color>();
+    boolean switched = false;
+
     /**
      * Creates new form MultiscaleMdoellingFrame
      */
@@ -83,7 +85,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         //offScrGraph = offScrImg.getGraphics();
         offScrGraph = offScrImg.createGraphics();
         offScrGraph.addRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING,
-                                RenderingHints.VALUE_RENDER_QUALITY));
+                RenderingHints.VALUE_RENDER_QUALITY));
 
         Timer time = new Timer();
         TimerTask task = new TimerTask() {
@@ -108,12 +110,18 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                     System.out.println("iteracja: " + iterationMC);
                     checkProgressMC();
                 }
-                if (iterationMC == 0) {
+                if (playMC && iterationMC == 0) {
                     //isFullMatrix();
                     playMC = false;
+                    startButton.setText("Finished");
+                    //startButton.setEnabled(false);
+                    addGrainsButton.setEnabled(false);
+                    addInclusionsButton.setEnabled(true);
+                    GBAllGrainsButton.setEnabled(true);
+                    GBSingleGrainsButton.setEnabled(true);
                     //play = false;
                     //startButton.setText("Finished");
-                   // startButton.setEnabled(false);
+                    // startButton.setEnabled(false);*/
                 }
             }
         };
@@ -137,9 +145,9 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
             jProgressBar1.setString((int) ((counter * 100) / (width * height)) + "% Complete");
         }
     }
-    
-    void checkProgressMC(){
-        int mcs = Integer.parseInt(MCSTextField.getText());  
+
+    void checkProgressMC() {
+        int mcs = Integer.parseInt(MCSTextField.getText());
         jProgressBar1.setValue((int) ((counter * 100) / mcs));
         if ((int) ((counter * 100) / mcs) == 100) {
             jProgressBar1.setString("100% Completed!");
@@ -167,10 +175,10 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 //if (matrix[i][j].id != -1) {
-                    offScrGraph.setColor(matrix[i][j].color);
-                    int x = i * jPanel1.getWidth() / width;
-                    int y = j * jPanel1.getHeight() / height;
-                    offScrGraph.fillRect(x, y, jPanel1.getWidth() / width, jPanel1.getHeight() / height);
+                offScrGraph.setColor(matrix[i][j].color);
+                int x = i * jPanel1.getWidth() / width;
+                int y = j * jPanel1.getHeight() / height;
+                offScrGraph.fillRect(x, y, jPanel1.getWidth() / width, jPanel1.getHeight() / height);
                 //}
             }
         }
@@ -188,6 +196,22 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         jPanel1.getGraphics().drawImage(offScrImg, 0, 0, jPanel1);
     }
 
+    void refresh2() {
+        offScrGraph.setColor(jPanel1.getBackground());
+        offScrGraph.fillRect(0, 0, jPanel1.getWidth(), jPanel1.getHeight());
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                //if (matrix[i][j].id != -1) {
+                offScrGraph.setColor(matrixED[i][j].color);
+                int x = i * jPanel1.getWidth() / width;
+                int y = j * jPanel1.getHeight() / height;
+                offScrGraph.fillRect(x, y, jPanel1.getWidth() / width, jPanel1.getHeight() / height);
+                //}
+            }
+        }
+        jPanel1.getGraphics().drawImage(offScrImg, 0, 0, jPanel1);
+    }
+
     /**
      * This method is called from within the constructor to the form. WARNING:
      * Do NOT modify this code. The content of this method is always regenerated
@@ -198,6 +222,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
         startButton = new javax.swing.JButton();
         createButton = new javax.swing.JButton();
         addGrainsButton = new javax.swing.JButton();
@@ -230,6 +255,12 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         MCSTextField = new javax.swing.JTextField();
         colorComboBox = new javax.swing.JComboBox<>();
         selectGrainsButton = new javax.swing.JButton();
+        switchButton = new javax.swing.JButton();
+        homogenousToggleButton = new javax.swing.JToggleButton();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        energyInsideTextField = new javax.swing.JTextField();
+        energyOnEdgesTextField = new javax.swing.JTextField();
         jMenuBar1 = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         microstructureMenu = new javax.swing.JMenu();
@@ -251,17 +282,22 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                 jPanel1ComponentResized(evt);
             }
         });
+        jPanel1.setLayout(new java.awt.CardLayout());
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 754, Short.MAX_VALUE)
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 682, Short.MAX_VALUE)
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 684, Short.MAX_VALUE)
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 784, Short.MAX_VALUE)
         );
+
+        jPanel1.add(jPanel2, "card2");
 
         startButton.setText("Start");
         startButton.addActionListener(new java.awt.event.ActionListener() {
@@ -313,13 +349,13 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
             }
         });
 
-        widthTextField.setText("50");
+        widthTextField.setText("200");
 
         jLabel5.setText("Width");
 
         jLabel6.setText("Height");
 
-        heightTextField.setText("50");
+        heightTextField.setText("200");
 
         jLabel7.setText("Type of neighborhood");
 
@@ -385,6 +421,28 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
             }
         });
 
+        switchButton.setText("Switch views");
+        switchButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                switchButtonActionPerformed(evt);
+            }
+        });
+
+        homogenousToggleButton.setText("Homogenous");
+        homogenousToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                homogenousToggleButtonActionPerformed(evt);
+            }
+        });
+
+        jLabel10.setText("Energy inside");
+
+        jLabel11.setText("Energy on edges");
+
+        energyInsideTextField.setText("1");
+
+        energyOnEdgesTextField.setText("9");
+
         fileMenu.setText("File");
 
         microstructureMenu.setText("Microstructure");
@@ -425,7 +483,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 1135, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 683, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(startButton, javax.swing.GroupLayout.PREFERRED_SIZE, 358, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addGroup(layout.createSequentialGroup()
@@ -434,8 +492,8 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                                         .addComponent(typeOfNeighborhoodComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
-                        .addGap(372, 372, 372)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 682, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(selectGrainsButton)
@@ -471,7 +529,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                                     .addGroup(layout.createSequentialGroup()
                                         .addGap(224, 224, 224)
                                         .addComponent(GBsizeLabel)
-                                        .addGap(0, 29, Short.MAX_VALUE))
+                                        .addGap(0, 0, Short.MAX_VALUE))
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -489,7 +547,19 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                                 .addComponent(jLabel8)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(stateNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))))))
+                                                .addComponent(stateNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(switchButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(homogenousToggleButton))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel11)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(energyOnEdgesTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel10)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(energyInsideTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -549,10 +619,22 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(colorComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(selectGrainsButton))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(switchButton)
+                            .addComponent(homogenousToggleButton))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel10)
+                            .addComponent(energyInsideTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel11)
+                            .addComponent(energyOnEdgesTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(41, 41, 41)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
@@ -1194,37 +1276,38 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         done = 0;
 
         Random random = new Random();
-        
-        for(int i = 0; i < width; i++){
-            for (int j = 0; j < height; j++){
+
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
                 matrix[i][j].visited = false;
             }
         }
         while (done < width * height) {
-            
+
             randomX = Math.abs(random.nextInt()) % width;
             randomY = Math.abs(random.nextInt()) % height;
             if (matrix[randomX][randomY].visited == false) {
-                if(matrix[randomX][randomY].color != Color.BLACK && matrix[randomX][randomY].color != dualPhaseColor) {           
-                energyBefore = calculateEnergy(randomX, randomY);
-                   //cellBefore = matrix[randomX][randomY]; 
-                   colorBefore = matrix[randomX][randomY].color;
-                randomColor = Math.abs(random.nextInt()) % stateNumber;
-                matrix[randomX][randomY].color = stateNumberList.get(randomColor);
-                matrix[randomX][randomY].id = Cell.idColor(matrix[randomX][randomY].color);
-                //cellAfter = matrix[randomX][randomY];
-                energyAfter = calculateEnergy(randomX, randomY);
-                
-                /*if ((energyAfter - energyBefore) <= 0) {
-                    matrix[randomX][randomY] = cellAfter;
-                } else */if ((energyAfter - energyBefore) > 0) {
-                    matrix[randomX][randomY].color = colorBefore;
+                if (matrix[randomX][randomY].color != Color.BLACK && matrix[randomX][randomY].color != dualPhaseColor) {
+                    energyBefore = calculateEnergy(randomX, randomY);
+                    //cellBefore = matrix[randomX][randomY]; 
+                    colorBefore = matrix[randomX][randomY].color;
+                    randomColor = Math.abs(random.nextInt()) % stateNumber;
+                    matrix[randomX][randomY].color = stateNumberList.get(randomColor);
                     matrix[randomX][randomY].id = Cell.idColor(matrix[randomX][randomY].color);
-                }
-                matrix[randomX][randomY].visited = true;
+                    //cellAfter = matrix[randomX][randomY];
+                    energyAfter = calculateEnergy(randomX, randomY);
+
+                    /*if ((energyAfter - energyBefore) <= 0) {
+                    matrix[randomX][randomY] = cellAfter;
+                } else */
+                    if ((energyAfter - energyBefore) > 0) {
+                        matrix[randomX][randomY].color = colorBefore;
+                        matrix[randomX][randomY].id = Cell.idColor(matrix[randomX][randomY].color);
+                    }
+                    matrix[randomX][randomY].visited = true;
                 }
                 done++;
-                
+
             }
         }
     }
@@ -1365,6 +1448,165 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         return energy;
     }
 
+    public void energyDistribution(Cell[][] a) {
+        matrixED = new Cell[width][height];
+        if (homogenousToggleButton.isSelected() == true) {
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    matrixED[i][j] = new Cell();
+                    matrixED[i][j].color = Cell.energyColor(Integer.parseInt(energyInsideTextField.getText()));
+                }
+            }
+        } else if (homogenousToggleButton.isSelected() == false) {
+            Cell energyOnEdges = new Cell();
+            energyOnEdges.color = Cell.energyColor(Integer.parseInt(energyOnEdgesTextField.getText()));
+            energyOnEdges.id = Cell.idColor(energyOnEdges.color);
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    matrixED[i][j] = new Cell();
+                    matrixED[i][j].color = Cell.energyColor(Integer.parseInt(energyInsideTextField.getText()));
+                    if (i > 0 && i < width - 1 && j > 0 && j < height - 1) {
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrixED[i][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                            matrixED[i + 1][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrixED[i + 1][j] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                            matrixED[i + 1][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrixED[i][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                            matrixED[i - 1][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrixED[i - 1][j] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                            matrixED[i - 1][j - 1] = energyOnEdges;
+                        }
+                    } else if (i == 0 && i < width - 1 && j > 0 && j < height - 1) {
+                        //matrixED[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrixED[i][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                            matrixED[i + 1][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrixED[i + 1][j] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                            matrixED[i + 1][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrixED[i][j + 1] = energyOnEdges;
+                        }
+                    } else if (i > 0 && i < width - 1 && j == 0 && j < height - 1) {
+                        //matrixED[i][j] = matrix[i][j];
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrixED[i + 1][j] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                            matrixED[i + 1][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrixED[i][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                            matrixED[i - 1][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrixED[i - 1][j] = energyOnEdges;
+                        }
+                    } else if (i > 0 && i == width - 1 && j > 0 && j < height - 1) {
+                        //matrixED[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrixED[i][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                            matrixED[i - 1][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrixED[i][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                            matrixED[i - 1][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrixED[i - 1][j] = energyOnEdges;
+                        }
+                    } else if (i > 0 && i < width - 1 && j > 0 && j == height - 1) {
+                        //matrixED[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrixED[i][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                            matrixED[i + 1][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrixED[i + 1][j] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrixED[i - 1][j] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                            matrixED[i - 1][j - 1] = energyOnEdges;
+                        }
+                    } else if (i == 0 && j == 0) {
+                        //matrixED[i][j] = matrix[i][j];
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrixED[i + 1][j] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j + 1].id != matrix[i][j].id) {
+                            matrixED[i + 1][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrixED[i][j + 1] = energyOnEdges;
+                        }
+                    } else if (i == width - 1 && j == 0) {
+                        //matrixED[i][j] = matrix[i][j];
+                        if (matrix[i][j + 1].id != matrix[i][j].id) {
+                            matrixED[i][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j + 1].id != matrix[i][j].id) {
+                            matrixED[i - 1][j + 1] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrixED[i - 1][j] = energyOnEdges;
+                        }
+                    } else if (i == 0 && j == height - 1) {
+                        //matrixED[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrixED[i][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j - 1].id != matrix[i][j].id) {
+                            matrixED[i + 1][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i + 1][j].id != matrix[i][j].id) {
+                            matrixED[i + 1][j] = energyOnEdges;
+                        }
+                    } else if (i == width - 1 && j == height - 1) {
+                        //matrixED[i][j] = matrix[i][j];
+                        if (matrix[i][j - 1].id != matrix[i][j].id) {
+                            matrixED[i][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j - 1].id != matrix[i][j].id) {
+                            matrixED[i - 1][j - 1] = energyOnEdges;
+                        }
+                        if (matrix[i - 1][j].id != matrix[i][j].id) {
+                            matrixED[i - 1][j] = energyOnEdges;
+                        }
+                    }
+                }
+            }
+        }
+    }
     private void jPanel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel1MouseClicked
 
         int i = width * evt.getX() / jPanel1.getWidth();
@@ -1391,7 +1633,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         offScrImg = new BufferedImage(jPanel1.getWidth(), jPanel1.getHeight(), BufferedImage.TYPE_INT_RGB);
         offScrGraph = offScrImg.createGraphics();
         offScrGraph.addRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING,
-                                RenderingHints.VALUE_RENDER_QUALITY));
+                RenderingHints.VALUE_RENDER_QUALITY));
         refresh();
     }//GEN-LAST:event_jPanel1ComponentResized
 
@@ -1417,7 +1659,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         clearSpaceButton.setEnabled(false);
         jProgressBar1.setValue(0);
         jProgressBar1.setString(0 + "% Complete");
-        
+
         stateNumberList2.clear();
         colorComboBox.removeAllItems();
     }//GEN-LAST:event_createButtonActionPerformed
@@ -2128,17 +2370,18 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
                 }
             }
         }
-        
+
         stateNumberList2 = stateNumberList;
         colorComboBox.setModel(new DefaultComboBoxModel(stateNumberList2.toArray()));
         refresh();
-        
+
 
     }//GEN-LAST:event_generateMonteCarloActionPerformed
 
     private void startMonteCarloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startMonteCarloActionPerformed
         // TODO add your handling code here:
         playMC = true;
+        iterationMC = Integer.parseInt(MCSTextField.getText());
         if (playMC) {
             startButton.setText("Pause");
             addInclusionsButton.setEnabled(false);
@@ -2146,18 +2389,19 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         } else {
             startButton.setText("Resume");
         }
-        iterationMC = Integer.parseInt(MCSTextField.getText());
+
+        
         /*for (int i = 0; i < iterationMC; i++) {
             monteCarlo();
             refresh();
             System.out.println("iteracja: " + i);
         }*/
-        
+
     }//GEN-LAST:event_startMonteCarloActionPerformed
 
     private void colorComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorComboBoxActionPerformed
         // TODO add your handling code here:
-        if (colorComboBox.getSelectedItem() != null){
+        if (colorComboBox.getSelectedItem() != null) {
             colorComboBox.setBackground(stateNumberList2.get(colorComboBox.getSelectedIndex()));
         }
     }//GEN-LAST:event_colorComboBoxActionPerformed
@@ -2184,6 +2428,30 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
         jProgressBar1.setValue(0);
         jProgressBar1.setString(0 + "% Complete");
     }//GEN-LAST:event_selectGrainsButtonActionPerformed
+
+    private void switchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchButtonActionPerformed
+        // TODO add your handling code here:
+        if (switched == false) {
+            switched = true;
+            energyDistribution(matrix);
+            refresh2();
+        } else if (switched == true) {
+            switched = false;
+            refresh();
+        }
+        //podmieniać matrix zamiast paneli!
+    }//GEN-LAST:event_switchButtonActionPerformed
+
+    private void homogenousToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_homogenousToggleButtonActionPerformed
+        // TODO add your handling code here:
+        if (homogenousToggleButton.isSelected() == true) {
+            jLabel11.setVisible(false);
+            energyOnEdgesTextField.setVisible(false);
+        } else {
+            jLabel11.setVisible(true);
+            energyOnEdgesTextField.setVisible(true);
+        }
+    }//GEN-LAST:event_homogenousToggleButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -2232,12 +2500,17 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     private javax.swing.JButton clearSpaceButton;
     private javax.swing.JComboBox<String> colorComboBox;
     private javax.swing.JButton createButton;
+    private javax.swing.JTextField energyInsideTextField;
+    private javax.swing.JTextField energyOnEdgesTextField;
     private javax.swing.JMenuItem exportMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JButton generateMonteCarlo;
     private javax.swing.JTextField heightTextField;
+    private javax.swing.JToggleButton homogenousToggleButton;
     private javax.swing.JMenuItem importMenuItem;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -2249,6 +2522,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JMenu microstructureMenu;
     private javax.swing.JTextField numbersOfGrainsTextField;
@@ -2258,6 +2532,7 @@ public class MultiscaleModellingFrame extends javax.swing.JFrame {
     private javax.swing.JButton startButton;
     private javax.swing.JButton startMonteCarlo;
     private javax.swing.JTextField stateNumberTextField;
+    private javax.swing.JButton switchButton;
     private javax.swing.JComboBox<String> typeOfInclusionComboBox;
     private javax.swing.JComboBox<String> typeOfNeighborhoodComboBox;
     private javax.swing.JTextField widthTextField;
